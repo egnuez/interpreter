@@ -24,14 +24,14 @@ int main (){
 		/** Print AST in three different formats **/
 		
 		lsbasi::Printer printer(ast);
-		std::cout << printer.print(lsbasi::Printer::_RPN_STYLE) << std::endl;
-		std::cout << printer.print(lsbasi::Printer::_LISP_STYLE) << std::endl;
-		std::cout << printer.print(lsbasi::Printer::_TREE) << std::endl;
+		std::cout << "RPN Notation -> " << printer.print(lsbasi::Printer::_RPN_STYLE) << std::endl;
+		std::cout << "Lisp Style - > " << printer.print(lsbasi::Printer::_LISP_STYLE) << std::endl;
+		std::cout << "Abstract Syntax Tree" << std::endl << printer.print(lsbasi::Printer::_TREE) << std::endl;
 
 		/** Intepret AST **/
 		
 		lsbasi::Interpreter interpreter(ast);
-		std::cout << interpreter.interpret() << std::endl;
+		std::cout << "Result -> " << interpreter.interpret() << std::endl;
 
 	}
 
