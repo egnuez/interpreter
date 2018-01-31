@@ -171,7 +171,7 @@ namespace lsbasi {
 				if (current_token->type == Token::_MUL)
 					eat(Token::_MUL);
 					
-				if (current_token->type == Token::_DIV)
+                                else if (current_token->type == Token::_DIV)
 					eat(Token::_DIV);
 
 				ast = new BinOp(tk, ast, factor());
@@ -192,7 +192,7 @@ namespace lsbasi {
 				if (current_token->type == Token::_PLUS)
 					eat(Token::_PLUS);
 
-				if (current_token->type == Token::_MINUS)
+                                else if (current_token->type == Token::_MINUS)
 					eat(Token::_MINUS);
 
 				ast = new BinOp(tk, ast, term());
