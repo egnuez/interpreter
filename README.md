@@ -170,3 +170,28 @@ d:=f*2;
 emiliano chapter09-02 $ ./a.out < test/test_fail.pas 
 Undefined variable => f
 ```
+### Chapter 9-3:
+```sh
+emiliano chapter09-03 $ c++ main.cpp 
+emiliano chapter09-03 $ cat test/test_ok.pas 
+BEGIN
+  BEGIN
+    number := 2;
+    a := number;
+    b := 10 * a + 10 * number / 4;
+    c := a - - b
+  END;
+  x := 11;
+END.
+emiliano chapter09-03 $ ./a.out < test/test_ok.pas 
+{a => 2,b => 25,c => 27,number => 2,x => 11}
+emiliano chapter09-03 $ cat test/test_fail.pas 
+BEGIN
+  a:=1;
+  b:=2;
+  c:=a+b;
+  d:=f*2;
+END.
+emiliano chapter09-03 $ ./a.out < test/test_fail.pas 
+Undefined variable => f
+```
