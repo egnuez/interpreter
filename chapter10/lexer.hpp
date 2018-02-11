@@ -25,7 +25,8 @@ namespace lsbasi {
 			_BEGIN,
 			_END,
 			_DOT,
-			_TYPE,
+			_TYPE_INTEGER,
+			_TYPE_REAL,
 			_VAR,
 			_PROGRAM,
 			_COMMA,
@@ -117,8 +118,10 @@ namespace lsbasi {
 						return new Token (Token::_BEGIN, word);
 					else if (word == "END")
 						return new Token (Token::_END, word);
-					else if ((word == "INTEGER") || (word == "REAL"))
-						return new Token (Token::_TYPE, word);
+					else if (word == "INTEGER")
+						return new Token (Token::_TYPE_INTEGER, word);  
+					else if (word == "REAL")
+						return new Token (Token::_TYPE_REAL, word);
 					else if (word == "VAR")
 						return new Token (Token::_VAR, word);
 					else if (word == "DIV")

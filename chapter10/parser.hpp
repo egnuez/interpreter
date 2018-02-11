@@ -207,7 +207,16 @@ namespace lsbasi {
 		}
 
 		AST * factor(){
-
+			/*
+			factor
+				: INTEGER 
+				| REAL
+				| RPARENT expr LPARNET
+				| PLUS factor 
+    			| MINUS factor
+				| ID
+				;
+			*/
 			AST * ast;
 
 			Token * tk;
@@ -245,7 +254,11 @@ namespace lsbasi {
 		}
 
 		AST * term(){
-
+			/*
+			term
+				: factor ((MUL | REAL_DIV | INT_DIV ) factor ) *
+				;
+			*/
 			AST * ast = factor();
 
 			while((current_token->type == Token::_MUL) 
@@ -269,7 +282,12 @@ namespace lsbasi {
 		}
 
 		AST * expr(){
-
+			/*
+			expr 
+				: term ((MINUS | PLUS) term ) *
+				;
+			
+			*/
 			AST * ast = term();
 
 			while((current_token->type == Token::_PLUS) || (current_token->type == Token::_MINUS)){
@@ -291,6 +309,11 @@ namespace lsbasi {
 		}
 
 		AST * assignment_statement(){
+			/*
+			assignment_statement
+				: ID SEMI expr
+				;
+			*/
 			AST * var = new Id(current_token);
 			eat(Token::_ID);
 			eat(Token::_ASSIGN);
@@ -299,11 +322,23 @@ namespace lsbasi {
 		}
 
 		AST * empty(){
+			/*
+			empty
+				: -
+				;
+			*/
 			AST * ast = new Empty();
 			return ast;
 		}
 
 		AST * statement(){
+			/*
+			statement
+				: assignment_statement 
+ 				| compound_statement 
+				| empty
+				;
+			*/
 			AST * ast;
 
 			if(current_token->type == Token::_ID){
@@ -317,6 +352,12 @@ namespace lsbasi {
 		}
 
 		AST * statement_list(){
+			/*
+			statement_list
+				: statement 
+ 				| statement SEMI statement_list
+				;
+			*/
 			AST * ast; 
 			std::vector<AST *> statements;
 			statements.push_back(statement());
@@ -328,6 +369,11 @@ namespace lsbasi {
 		}
 
 		AST * compound_statement(){
+			/*
+			compound_statement
+				: BEGIN statement_list END
+				;
+			*/
 			AST * ast;
 			eat(Token::_BEGIN);
 			ast = statement_list();
@@ -336,6 +382,11 @@ namespace lsbasi {
 		}
 
 		AST * variable_declaration(){
+			/*
+			variable_declaration
+				: ID (COMMA ID)* COLON TYPE
+				;
+			*/
 			std::vector<AST *> variables;
 			variables.push_back(new Id(current_token));
 			eat(Token::_ID);
@@ -347,12 +398,20 @@ namespace lsbasi {
 			eat(Token::_COLON);
 			Token * tk;
 			tk = current_token;
-			eat(Token::_TYPE);
+			if ((current_token->type == Token::_TYPE_INTEGER) || 
+				(current_token->type == Token::_TYPE_REAL));
+			eat(current_token->type); 
 			return new VarDecl(variables, new Type(tk));
 
 		}
 
 		AST * declarations(){
+			/*
+			declarations
+				: VAR (variable_declaration SEMI)+	
+				| empty
+				;
+			*/
 			std::vector<AST *> decs;
 			if(current_token->type == Token::_VAR){
 				eat(Token::_VAR);
@@ -369,10 +428,20 @@ namespace lsbasi {
 		}
 
 		AST * block(){
+			/*
+			block
+				: declarations compound_statement
+				;
+			*/
 			return new Block(declarations(), compound_statement());
 		}
 
 		AST * program(){
+			/*
+			program
+				: PROGRAM ID SEMI block DOT
+				;
+			*/
 			eat(Token::_PROGRAM);
 			AST * var = new Id(current_token);
 			eat(Token::_ID);

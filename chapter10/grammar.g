@@ -1,23 +1,24 @@
 Grammar lsbasi; 
 
 expr 
-	: term (('-' | '+') term ) *
+	: term ((MINUS | PLUS) term ) *
 	;
 
 term
-	: factor (('*' | '/' | 'DIV' ) factor ) *
+	: factor ((MUL | REAL_DIV | INT_DIV ) factor ) *
 	;
 
 factor
-	: '+' factor 
-    | '-' factor 
-	| NUM 
-	| ID 
-	| '(' expr ')'
+	: INTEGER 
+	| REAL
+	| RPARENT expr LPARENT
+	| PLUS factor 
+    | MINUS factor
+	| ID
 	;
 
 assignment_statement
-	: ID ':=' expr
+	: ID ASSIGN expr
 	;
 
 empty:
@@ -30,7 +31,7 @@ statement
 	;
 
 program
-	: 'PROGRAM' ID ';' block '.'
+	: PROGRAM ID SEMI block DOT
 	;
 
 block
@@ -38,32 +39,42 @@ block
 	;
 
 declarations
-	: 'VAR' (variable_declaration ';')+	
+	: VAR (variable_declaration SEMI)+	
 	| empty
 	;
 
 variable_declaration
-	: ID (',' ID)* ':' TYPE
+	: ID (COMMA ID)* COLON TYPE
 	;
 
 compound_statement
-	: 'BEGIN' statement_list 'END'
+	: BEGIN statement_list END
 	;
 
 statement_list
 	: statement 
- 	| statement ';' statement_list
+ 	| statement SEMI statement_list
 	;
 
-ID
-	: "[a-zA-Z][a-zA-Z0-9]*"
-	;
-
-NUM
-	: "[0-9]+(.[0-9]+)?"
-	;
-
-TYPE
-	: "INTEGER"
-	| "REAL"
-	;
+TYPE_INTEGER:	'INTEGER'
+TYPE_REAL: 		'REAL'
+PROGRAM:		'PROGRAM'
+VAR:			'VAR'
+BEGIN:			'BEGIN'
+END:			'END'
+MINUS:			'-'
+PLUS:			'+'
+MUL:			'*'
+REAL_DIV:		'/'
+INT_DIV:		'DIV'
+RPARENT: 		'('
+LPARENT: 		')'
+ASSIGN:			':='
+DOT 			'.'
+COMMA:			','
+SEMI:			';'
+COLON:			':'
+REAL: 			[0-9]+(.[0-9]+)?
+INTEGER: 		[0-9]+
+ID:				[a-zA-Z_][a-zA-Z0-9_]*
+SPACES:			[ \t\n\r]+ -> skip
