@@ -196,6 +196,18 @@ emiliano chapter09-03 $ ./a.out < test/test_fail.pas
 Undefined variable => f
 ```
 ### Chapter 10:
+```pascal
+PROGRAM Part10AST;
+VAR
+  a, b : INTEGER;
+  y    : REAL;
+
+BEGIN {Part10AST}
+  a := 2;
+  b := 10 * a + 10 * a DIV 4;
+  y := 20 / 7 + 3.14;
+END.  {Part10AST}
+```
 ```sh
 emiliano chapter10 $ c++ main.cpp 
 emiliano chapter10 $ ./a.out < test/test_ok.pas 
