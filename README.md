@@ -195,3 +195,61 @@ END.
 emiliano chapter09-03 $ ./a.out < test/test_fail.pas 
 Undefined variable => f
 ```
+```
+### Chapter 10:
+```sh
+emiliano chapter10 $ c++ main.cpp 
+emiliano chapter10 $ ./a.out < test/test_ok.pas 
+Program(
+  Id(Part10AST)
+  Block(
+    VarDecl(
+      Id(a)
+      Type(INTEGER)
+    )
+    VarDecl(
+      Id(b)
+      Type(INTEGER)
+    )
+    VarDecl(
+      Id(y)
+      Type(REAL)
+    )
+    StatementList(
+      Assignment(
+        Id(a)
+        Num(2)
+      )
+      Assignment(
+        Id(b)
+        BinOp[+](
+          BinOp[*](
+            Num(10)
+            Id(a)
+          )
+          BinOp[DIV](
+            BinOp[*](
+              Num(10)
+              Id(a)
+            )
+            Num(4)
+          )
+        )
+      )
+      Assignment(
+        Id(y)
+        BinOp[+](
+          BinOp[/](
+            Num(20)
+            Num(7)
+          )
+          Num(3)
+        )
+      )
+    )
+  )
+)
+
+{a => 2,b => 25,y => 5.85714}
+
+```
