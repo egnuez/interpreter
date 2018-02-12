@@ -195,7 +195,6 @@ END.
 emiliano chapter09-03 $ ./a.out < test/test_fail.pas 
 Undefined variable => f
 ```
-```
 ### Chapter 10:
 ```sh
 emiliano chapter10 $ c++ main.cpp 
