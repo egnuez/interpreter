@@ -17,17 +17,18 @@ namespace lsbasi {
 
 		std::stringstream print_op(BinOp *node, std::string op, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
-			ss << "BinOp(" << op << ")" << std::endl;
 			deep += 2;
+			ss << std::string(deep, ' ') << "BinOp["<< op <<"](" << std::endl;
 			ss << dispatcher(node->left, deep).str();
 			ss << dispatcher(node->right, deep).str();
+			ss << std::string(deep, ' ') << ")" << std::endl;
 			return ss;
 
 		}
 
 		std::stringstream visit(Num *node, int deep){
 			std::stringstream ss;
+			deep += 2;
 			ss << std::string(deep, ' ');
 			ss << "Num(" << node->value << ")" << std::endl; 
 			return ss;
@@ -35,6 +36,7 @@ namespace lsbasi {
 
 		std::stringstream visit(Id *node, int deep){
 			std::stringstream ss;
+			deep += 2;
 			ss << std::string(deep, ' ');
 			ss << "Id(" << node->value << ")" << std::endl; 
 			return ss;
@@ -42,11 +44,11 @@ namespace lsbasi {
 
 		std::stringstream visit(Assign *node, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
-			ss << "Assignment()" << std::endl;
 			deep += 2;
+			ss << std::string(deep, ' ') << "Assignment(" << std::endl;
 			ss << dispatcher(node->id, deep).str();
 			ss << dispatcher(node->expr, deep).str();
+			ss << std::string(deep, ' ') << ")" << std::endl;
 			return ss;
 		}
 
@@ -71,55 +73,65 @@ namespace lsbasi {
 
 		std::stringstream visit(StatementList *node, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
-			ss << "StatementList()" << std::endl;
 			deep += 2;
+			ss << std::string(deep, ' ') << "StatementList(" << std::endl;
 			std::vector<AST*>::iterator begin = node->statements.begin();
 			std::vector<AST*>::iterator end = node->statements.end();
 			for (std::vector<AST*>::iterator it = begin; it != end; ++it)
 				ss << dispatcher(*it, deep).str();
+			ss << std::string(deep, ' ') << ")" << std::endl;
 			return ss;
 		}
 
 		std::stringstream visit(Program *node, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
-			ss << "Program()" << std::endl;
-			deep += 2;
+			ss << std::string(deep, ' ') << "Program(" << std::endl;
 			ss << dispatcher(node->id, deep).str();
 			ss << dispatcher(node->bloque, deep).str();
-			deep += 2;
+			ss << std::string(deep, ' ') << ")" << std::endl;
 			return ss;
 		}
 
 		std::stringstream visit(Block *node, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
-			ss << "Block()" << std::endl;
 			deep += 2;
-			ss << dispatcher(node->declarations, deep).str();
+			ss << std::string(deep, ' ') << "Block(" << std::endl;
+			for (VarDecl * var : node->vars){
+				ss << dispatcher(var, deep).str();
+			}
 			ss << dispatcher(node->compound_statement, deep).str();
+			ss << std::string(deep, ' ') << ")" << std::endl;
 			return ss;
 		}
 
 		std::stringstream visit(Type *node, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
 			deep += 2;
+			ss << std::string(deep, ' ');
 			ss << "Type(" << node->value << ")" << std::endl;
+			return ss;
+		}
+
+		std::stringstream visit(VarsDecl *node, int deep){
+			std::stringstream ss;
+			ss << std::string(deep, ' ');
+			ss << "VarDecl()" << std::endl;
+			deep += 2;
+			std::vector<Id*>::iterator begin = node->ids.begin();
+			std::vector<Id*>::iterator end = node->ids.end();
+			for (std::vector<Id*>::iterator it = begin; it != end; ++it)
+				ss << dispatcher(*it, deep).str();
+			ss << dispatcher(node->type, deep).str();
 			return ss;
 		}
 
 		std::stringstream visit(VarDecl *node, int deep){
 			std::stringstream ss;
-			ss << std::string(deep, ' ');
-			ss << "VarDecl()" << std::endl;
 			deep += 2;
-			std::vector<AST*>::iterator begin = node->ids.begin();
-			std::vector<AST*>::iterator end = node->ids.end();
-			for (std::vector<AST*>::iterator it = begin; it != end; ++it)
-				ss << dispatcher(*it, deep).str();
+			ss << std::string(deep, ' ') << "VarDecl(" << std::endl;
+			ss << dispatcher(node->id, deep).str();
 			ss << dispatcher(node->type, deep).str();
+			ss << std::string(deep, ' ') << ")" << std::endl;
 			return ss;
 		}
 
@@ -128,9 +140,9 @@ namespace lsbasi {
 			ss << std::string(deep, ' ');
 			ss << "DecList()" << std::endl;
 			deep += 2;
-			std::vector<AST*>::iterator begin = node->declarations.begin();
-			std::vector<AST*>::iterator end = node->declarations.end();
-			for (std::vector<AST*>::iterator it = begin; it != end; ++it)
+			std::vector<VarsDecl *>::iterator begin = node->declarations.begin();
+			std::vector<VarsDecl *>::iterator end = node->declarations.end();
+			for (std::vector<VarsDecl *>::iterator it = begin; it != end; ++it)
 				ss << dispatcher(*it, deep).str();
 			return ss;
 		};

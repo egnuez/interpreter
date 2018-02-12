@@ -95,7 +95,9 @@ namespace lsbasi {
 
 		float visit(Block *node){
 			float ret = 0;
-			dispatcher(node->declarations);
+			for (VarDecl * var : node->vars){
+				dispatcher(var);
+			}
 			dispatcher(node->compound_statement);
 			return ret;
 		}
@@ -110,9 +112,13 @@ namespace lsbasi {
 			return ret;
 		}
 
-		float visit(VarDecl *node){
+		float visit(VarsDecl *node){
 			float ret = 0;
 			return ret;
+		}
+
+		float visit(VarDecl *node){
+			return 0.0;
 		}
 
 		public:

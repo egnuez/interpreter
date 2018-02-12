@@ -1,6 +1,10 @@
-BEGIN
-a:=1;
-b:=2;
-c:=a+b;
-d:=f*2;
-END.
+PROGRAM Part10AST;
+VAR
+  a, b : INTEGER;
+  y    : REAL;
+
+BEGIN {Part10AST}
+  a := 2;
+  b := 10 * a + 10 * a DIV 4;
+  y := 20 / 7 + x;
+END.  {Part10AST}

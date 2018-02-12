@@ -18,6 +18,7 @@ namespace lsbasi {
 		virtual std::stringstream visit(class Program *ast, int deep) = 0;
 		virtual std::stringstream visit(class Block *ast, int deep) = 0;
 		virtual std::stringstream visit(class Type *ast, int deep) = 0;
+		virtual std::stringstream visit(class VarsDecl *ast, int deep) = 0;
 		virtual std::stringstream visit(class VarDecl *ast, int deep) = 0;
 		virtual std::stringstream visit(class DecList *ast, int deep) = 0;
 
@@ -34,6 +35,7 @@ namespace lsbasi {
 		virtual float visit(class Program *ast) = 0;
 		virtual float visit(class Block *ast) = 0;
 		virtual float visit(class Type *ast) = 0;
+		virtual float visit(class VarsDecl *ast) = 0;
 		virtual float visit(class VarDecl *ast) = 0;
 		virtual float visit(class DecList *ast) = 0;
 	};
@@ -97,9 +99,9 @@ namespace lsbasi {
 	};
 
 	struct Assign: public AST {
-		AST * id;
+		Id * id;
 		AST * expr;
-		Assign(AST * id, AST * expr): id(id), expr(expr){}
+		Assign(Id * id, AST * expr): id(id), expr(expr){}
 		std::stringstream handler(VisitorPrint * v, int deep){
 			return v->visit(this, deep);
 		}
@@ -130,23 +132,9 @@ namespace lsbasi {
 	};
 
 	struct Program: public AST {
-		AST * id;
-		AST * bloque;
-		Program(AST * id, AST * bloque): id(id), bloque(bloque){}
-		std::stringstream handler(VisitorPrint * v, int deep){
-			return v->visit(this, deep);
-		}
-		float handler(VisitorInterpreter * v){
-			return v->visit(this);
-		}
-	};
-
-	struct Block: public AST {
-		AST * declarations;
-		AST * compound_statement;
-		Block(AST * declarations, AST * compound_statement): 
-			declarations(declarations), 
-			compound_statement(compound_statement){}
+		Id * id;
+		Block * bloque;
+		Program(Id * id, Block * bloque): id(id), bloque(bloque){}
 		std::stringstream handler(VisitorPrint * v, int deep){
 			return v->visit(this, deep);
 		}
@@ -156,8 +144,20 @@ namespace lsbasi {
 	};
 
 	struct DecList: public AST {
-		std::vector<AST *> declarations;
-		DecList(std::vector<AST *> declarations): declarations(declarations){};
+		std::vector<VarsDecl *> declarations;
+		DecList(std::vector<VarsDecl *> declarations): declarations(declarations){};
+		std::stringstream handler(VisitorPrint * v, int deep){
+			return v->visit(this, deep);
+		}
+		float handler(VisitorInterpreter * v){
+			return v->visit(this);
+		}
+	};
+
+	struct VarsDecl: public AST {
+		std::vector<Id *> ids;
+		Type * type;
+		VarsDecl(std::vector<Id *> ids, Type * type): ids(ids), type(type){}
 		std::stringstream handler(VisitorPrint * v, int deep){
 			return v->visit(this, deep);
 		}
@@ -167,9 +167,28 @@ namespace lsbasi {
 	};
 
 	struct VarDecl: public AST {
-		std::vector<AST *> ids;
-		AST * type;
-		VarDecl(std::vector<AST *> ids, AST * type): ids(ids), type(type){}
+		Id * id;
+		Type * type;
+		VarDecl(Id * id, Type * type): id(id), type(type){}
+		std::stringstream handler(VisitorPrint * v, int deep){
+			return v->visit(this, deep);
+		}
+		float handler(VisitorInterpreter * v){
+			return v->visit(this);
+		}
+	};
+
+	struct Block: public AST {
+		std::vector<VarDecl *> vars;
+		AST * compound_statement;
+		Block(DecList* declist, AST * compound_statement): 
+			compound_statement(compound_statement){
+			for(VarsDecl* decls : declist->declarations){
+				for(Id* var : decls->ids){
+					this->vars.push_back(new VarDecl(var,decls->type));
+				}
+			}
+		}
 		std::stringstream handler(VisitorPrint * v, int deep){
 			return v->visit(this, deep);
 		}
@@ -308,27 +327,25 @@ namespace lsbasi {
 			return ast;
 		}
 
-		AST * assignment_statement(){
+		Assign * assignment_statement(){
 			/*
 			assignment_statement
 				: ID SEMI expr
 				;
 			*/
-			AST * var = new Id(current_token);
+			Id * var = new Id(current_token);
 			eat(Token::_ID);
 			eat(Token::_ASSIGN);
-			AST * ast = new Assign(var, expr());
-			return ast;
+			return new Assign(var, expr());
 		}
 
-		AST * empty(){
+		Empty * empty(){
 			/*
 			empty
 				: -
 				;
 			*/
-			AST * ast = new Empty();
-			return ast;
+			return new Empty();
 		}
 
 		AST * statement(){
@@ -351,14 +368,13 @@ namespace lsbasi {
 			return ast;
 		}
 
-		AST * statement_list(){
+		StatementList * statement_list(){
 			/*
 			statement_list
 				: statement 
  				| statement SEMI statement_list
 				;
 			*/
-			AST * ast; 
 			std::vector<AST *> statements;
 			statements.push_back(statement());
 			while(current_token->type == Token::_SEMI){
@@ -368,26 +384,26 @@ namespace lsbasi {
 			return new StatementList(statements); 
 		}
 
-		AST * compound_statement(){
+		StatementList * compound_statement(){
 			/*
 			compound_statement
 				: BEGIN statement_list END
 				;
 			*/
-			AST * ast;
+			StatementList * ast;
 			eat(Token::_BEGIN);
 			ast = statement_list();
 			eat(Token::_END);
 			return ast;
 		}
 
-		AST * variable_declaration(){
+		VarsDecl * variable_declaration(){
 			/*
 			variable_declaration
 				: ID (COMMA ID)* COLON TYPE
 				;
 			*/
-			std::vector<AST *> variables;
+			std::vector<Id *> variables;
 			variables.push_back(new Id(current_token));
 			eat(Token::_ID);
 			while(current_token->type == Token::_COMMA){
@@ -401,18 +417,18 @@ namespace lsbasi {
 			if ((current_token->type == Token::_TYPE_INTEGER) || 
 				(current_token->type == Token::_TYPE_REAL));
 			eat(current_token->type); 
-			return new VarDecl(variables, new Type(tk));
+			return new VarsDecl(variables, new Type(tk));
 
 		}
 
-		AST * declarations(){
+		DecList * declarations(){
 			/*
 			declarations
 				: VAR (variable_declaration SEMI)+	
 				| empty
 				;
 			*/
-			std::vector<AST *> decs;
+			std::vector<VarsDecl *> decs;
 			if(current_token->type == Token::_VAR){
 				eat(Token::_VAR);
 				decs.push_back(variable_declaration());
@@ -421,13 +437,11 @@ namespace lsbasi {
 					decs.push_back(variable_declaration());
 					eat(Token::_SEMI);
 				}
-				return new DecList(decs);
-			}else{
-				return empty();
 			}
+			return new DecList(decs);
 		}
 
-		AST * block(){
+		Block * block(){
 			/*
 			block
 				: declarations compound_statement
@@ -443,10 +457,10 @@ namespace lsbasi {
 				;
 			*/
 			eat(Token::_PROGRAM);
-			AST * var = new Id(current_token);
+			Id * var = new Id(current_token);
 			eat(Token::_ID);
 			eat(Token::_SEMI);
-			AST * blk = block();
+			Block * blk = block();
 			eat(Token::_DOT);
 			return new Program(var, blk);
 		}
