@@ -19,8 +19,8 @@ VAR
       k := 1;
   END;  {P1} 
 
-BEGIN {Part10AST}
+BEGIN {Part12}
   a := 2;
   b := 10 * a + 10 * a DIV 4;
   y := 20 / 7 + 3.14;
-END.  {Part10AST}
+END.  {Part12}
