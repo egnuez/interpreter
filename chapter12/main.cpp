@@ -37,7 +37,8 @@ int main (){
 		/** Semantic - Type Checking **/
 
 		lsbasi::SymbolsTableBuilder symbols_table_builder(ast);
-		symbols_table_builder.check();
+		symbols_table_builder.static_check();
+		symbols_table_builder.print_symbols();
 
 		/** Intepret AST **/
 

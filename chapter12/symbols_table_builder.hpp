@@ -36,6 +36,17 @@ namespace lsbasi {
 			}
 	};
 
+	class ProcedureType : public Symbol {
+		public:
+			BuildInType * type;
+			ProcedureType(std::string name):Symbol(name) {}
+			std::string repr(){
+				std::stringstream ss;
+				ss << "<" << name << ":" << "[Procedure]" << ">";
+				return ss.str();
+			}
+	};
+
 	class SymbolsTable {
 		
 		public:
@@ -127,6 +138,8 @@ namespace lsbasi {
 		void visit(Block *node){
 			for (VarDecl * var : node->vars)
 				dispatcher(var);
+			for (ProcedureDecl * var : node->pvars)
+				dispatcher(var);
 			dispatcher(node->compound_statement);
 		}
 
@@ -145,17 +158,23 @@ namespace lsbasi {
 		void visit(DecList *node){
 		};
 
-		void visit(ProcedureDecl *ast){
+		void visit(ProcedureDecl *node){
+			std::string var = (static_cast<Id *>(node->id))->value;
+			symbols.define(new ProcedureType(var));
+			dispatcher(node->block);
 		}
 
 		public:
 		
 		SymbolsTableBuilder(AST * ast): ast(ast){}
 
-		bool check (){
+		bool static_check (){
 			dispatcher(ast);
-			symbols.print();
 			return true;
+		}
+
+		void print_symbols() {
+			symbols.print();
 		}
 	};
 
